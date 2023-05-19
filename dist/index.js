@@ -67,7 +67,6 @@ function run() {
                     approved_users.add(review.user.login);
                 }
             }
-            // let state = "success"
             const review_gatekeeper = new review_gatekeeper_1.ReviewGatekeeper(Array.from(requested_users), Array.from(approved_users));
             const sha = payload.pull_request.head.sha;
             // The workflow url can be obtained by combining several environment varialbes, as described below:
@@ -76,8 +75,11 @@ function run() {
             core.info(`Setting a status on commit (${sha})`);
             octokit.rest.repos.createCommitStatus(Object.assign(Object.assign({}, context.repo), { sha, state: review_gatekeeper.satisfy() ? 'success' : 'failure', context: 'Review Gatekeeper Status', target_url: workflow_url, description: review_gatekeeper.satisfy()
                     ? undefined
-                    : review_gatekeeper.getMessages().join(' ').substring(0, 140) }));
-            if (!review_gatekeeper.satisfy()) {
+                    : review_gatekeeper.getMessages()[0] }));
+            if (review_gatekeeper.satisfy()) {
+                core.info(review_gatekeeper.getMessages().join(os_1.EOL));
+            }
+            else {
                 core.setFailed(review_gatekeeper.getMessages().join(os_1.EOL));
                 return;
             }
@@ -107,10 +109,15 @@ class ReviewGatekeeper {
         this.meet_criteria = true;
         for (const requested_reviewer of requested_reviewers) {
             if (!approved_reviewers.includes(requested_reviewer)) {
+                if (this.meet_criteria) {
+                    this.messages.push(`not all requested reviewers have approved the pull request`);
+                }
                 this.meet_criteria = false;
-                this.messages.push('not all requested reviewers have approved');
+                this.messages.push(`requested reviewer ${requested_reviewer} has not approved the pull request`);
             }
         }
+        this.messages.push(`requested_reviewers:${requested_reviewers}`);
+        this.messages.push(`approved_reviewers:${approved_reviewers}`);
     }
     satisfy() {
         return this.meet_criteria;

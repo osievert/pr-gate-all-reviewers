@@ -8,10 +8,20 @@ export class ReviewGatekeeper {
 
     for (const requested_reviewer of requested_reviewers) {
       if (!approved_reviewers.includes(requested_reviewer)) {
+        if (this.meet_criteria) {
+          this.messages.push(
+            `not all requested reviewers have approved the pull request`
+          )
+        }
         this.meet_criteria = false
-        this.messages.push('not all requested reviewers have approved')
+        this.messages.push(
+          `requested reviewer ${requested_reviewer} has not approved the pull request`
+        )
       }
     }
+
+    this.messages.push(`requested_reviewers:${requested_reviewers}`)
+    this.messages.push(`approved_reviewers:${approved_reviewers}`)
   }
 
   satisfy(): boolean {
