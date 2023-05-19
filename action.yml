@@ -1,0 +1,13 @@
+name: 'Review Gatekeeper'
+description: 'A github action that ensures all requested reviewers have reviewed a pull request.'
+author: 'osievert'
+branding:
+    icon: 'check-square'
+    color: 'green'
+inputs:
+    token:
+        required: true
+        description: 'Repository token'
+runs:
+    using: 'node12'
+    main: 'dist/index.js'
