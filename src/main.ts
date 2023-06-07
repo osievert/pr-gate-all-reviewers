@@ -69,12 +69,9 @@ async function run(): Promise<void> {
         : review_gatekeeper.getMessages()[0]
     })
 
-    if (review_gatekeeper.satisfy()) {
-      core.info(review_gatekeeper.getMessages().join(EOL))
-    } else {
-      core.setFailed(review_gatekeeper.getMessages().join(EOL))
-      return
-    }
+    // this run always return success (all status comes through the Review Gatekeeper Status, above)
+    core.info(review_gatekeeper.getMessages().join(EOL))
+
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)
